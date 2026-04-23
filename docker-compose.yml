@@ -1,0 +1,40 @@
+services:
+
+  postgres:
+    container_name: postgres-${BRANCH:-None}-${TAG:-None}-${COMMIT_SHORT_SHA:-None}
+    image: postgres
+    shm_size: 128mb
+    volumes:
+      - "postgres:/var/lib/postgresql:rw"
+    environment:
+      POSTGRES_PASSWORD: postgres
+    hostname: postgres
+    restart: always
+    networks:
+      parser:
+        ipv4_address: 172.40.0.1
+    ports:
+      - "5432:5432"
+
+  parser:
+    container_name: parser-${BRANCH:-None}-${TAG:-None}-${COMMIT_SHORT_SHA:-None}
+    image: parser-${BRANCH:-None}-${TAG:-None}-${COMMIT_SHORT_SHA:-None}
+    build: .
+    #volumes:
+    env_file:
+      - path: .env
+    #restart: always
+    hostname: parser
+    networks:
+      parser:
+        ipv4_address: 172.40.0.2
+
+volumes:
+  parser:
+    external: true
+  postgres:
+    external: true
+
+networks:
+  parser:
+    external: true
