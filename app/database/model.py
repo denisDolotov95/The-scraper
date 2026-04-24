@@ -4,12 +4,9 @@ from datetime import datetime
 from sqlalchemy import Sequence, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-# from werkzeug.security import check_password_hash, generate_password_hash
-
 
 class Base(DeclarativeBase):
     pass
-    # metadata = MetaData(schema=os.environ.get("DB_SCHEMA", "prod"))
 
 
 class INN(Base):

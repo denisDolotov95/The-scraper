@@ -8,11 +8,12 @@ services:
       - "postgres:/var/lib/postgresql:rw"
     environment:
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: parser
     hostname: postgres
     restart: always
     networks:
       parser:
-        ipv4_address: 172.40.0.1
+        ipv4_address: 172.40.0.2
     ports:
       - "5432:5432"
 
@@ -27,7 +28,7 @@ services:
     hostname: parser
     networks:
       parser:
-        ipv4_address: 172.40.0.2
+        ipv4_address: 172.40.0.3
 
 volumes:
   parser:
@@ -37,4 +38,8 @@ volumes:
 
 networks:
   parser:
-    external: true
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.40.0.0/24
+          gateway: 172.40.0.1

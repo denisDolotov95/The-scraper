@@ -63,8 +63,3 @@ target/
 
 # *.db
 # data/
-app/data/logs/
-app/data/database.db
-proxies.json
-.mypy_cache
-git_push.sh
