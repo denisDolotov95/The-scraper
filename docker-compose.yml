@@ -20,7 +20,10 @@ services:
   parser:
     container_name: parser-${BRANCH:-None}-${TAG:-None}-${COMMIT_SHORT_SHA:-None}
     image: parser-${BRANCH:-None}-${TAG:-None}-${COMMIT_SHORT_SHA:-None}
-    build: .
+    build:
+      context: .
+      args:
+        - FILE_INN=inn.csv
     #volumes:
     env_file:
       - path: .env

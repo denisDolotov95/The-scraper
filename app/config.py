@@ -20,6 +20,9 @@ MAX_RETRIES = int(os.environ.get("MAX_RETRIES", 5))
 # Начальное значение для задержки (используется экспоненциальное)
 BASE_BACKOFF = float(os.environ.get("BASE_BACKOFF", 1))
 
+# Имя файла ИНН
+INN_FILE = os.environ.get("FILE_INN", "inn.csv")
+
 # Добавим разные агенты, для обхода блокировки
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",

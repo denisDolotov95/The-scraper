@@ -29,10 +29,13 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
+# Запуск проекта
+ARG FILE_INN
+ENV FILE_INN=$FILE_INN
+
 # Copy application code
 COPY . .
 RUN chmod 755 entrypoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
-# Запуск проекта
 CMD ["python3", "app"]

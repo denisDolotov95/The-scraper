@@ -4,6 +4,8 @@ import asyncio
 import logging
 import logging.handlers as l_handl
 
+import config as cfg
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 for log in (logging.getLogger(n) for n in logging.root.manager.loggerDict):
@@ -27,7 +29,12 @@ logging.basicConfig(
 
 async def main():
 
+    import pandas as pd
+    
+    data = pd.read_csv(cfg.INN_FILE)
+    
     while True:
+        logging.info(f"\n{data.head(100)}")
         await asyncio.sleep(10000)
 
 
