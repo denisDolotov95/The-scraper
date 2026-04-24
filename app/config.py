@@ -2,12 +2,7 @@
 import os
 
 from database import engine, request
-#(
-#            f"{self._driver}{'+asyncpg' if self._async_req else ''}://{self._username}:"
-#            + f"{self._password}@{self._host}:"
-#            + f"{self._port}/{self._service_name}"
-#        )
-# f"sqlite+aiosqlite:///{file_path}"
+
 engine = engine.EnginePSQL(
     url=os.getenv(
         "DB_URL",

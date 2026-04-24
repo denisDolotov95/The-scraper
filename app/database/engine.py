@@ -53,13 +53,14 @@ class EngineSQLite(Engine):
     ):
         super().__init__()
         self.connect_args = connect_args if connect_args else {}
-        self.url = url
+        self._url = url
         self.__create_engine(**kwargs)
 
     def __create_engine(self, **kwargs) -> None:
 
-        self._engine = create_async_engine(
-            self.url,
+        func = create_async_engine if "aiosqlite" in self._url else create_engine
+        self._engine = func(
+            self._url,
             connect_args=self.connect_args,
             poolclass=pool.NullPool,
             **kwargs,
