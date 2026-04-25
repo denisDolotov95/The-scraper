@@ -19,10 +19,13 @@ class INN(Base):
 
     inn_id_seq = Sequence("inn_id_seq", start=0, increment=1)
 
+    # id: Mapped[int] = mapped_column(
+    #     inn_id_seq, server_default=inn_id_seq.next_value(), primary_key=True
+    # )
     id: Mapped[int] = mapped_column(
-        inn_id_seq, server_default=inn_id_seq.next_value(), primary_key=True
+        inn_id_seq, primary_key=True
     )
-    inn_number: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    inn_number: Mapped[str] = mapped_column(nullable=False)
     case_number: Mapped[str] = mapped_column(nullable=False)
     last_date: Mapped[date] = mapped_column(nullable=False)
     name_document: Mapped[str] = mapped_column(nullable=True)
@@ -30,7 +33,7 @@ class INN(Base):
 
     def __init__(
         self,
-        inn_number: int,
+        inn_number: str,
         case_number: str,
         last_date: date,
         name_document: str = None,
