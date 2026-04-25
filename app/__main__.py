@@ -1,12 +1,18 @@
 # coding: utf-8
 import os
+import pandas as pd
 import asyncio
 import logging
 import logging.handlers as l_handl
 
+import util
+import parser as pars
 import config as cfg
+import model
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+from database import model as sql_model
+
+logger = logging.getLogger(__name__)
 
 for log in (logging.getLogger(n) for n in logging.root.manager.loggerDict):
     if "1" == os.getenv("DEBUG", "0"):
@@ -15,11 +21,12 @@ for log in (logging.getLogger(n) for n in logging.root.manager.loggerDict):
         log.setLevel(logging.INFO)
 
 rot_file_handler = l_handl.RotatingFileHandler(
-    "app.log", maxBytes=50 * 1024 * 1024, backupCount=10, encoding="utf-8"
+    "./app/logs/app.log", maxBytes=50 * 1024 * 1024, backupCount=10, encoding="utf-8"
 )
 
+
 logging.basicConfig(
-    handlers=[rot_file_handler],
+    handlers=None if "1" == os.getenv("LOG_STDOUT", "0") else [rot_file_handler],
     format=(
         "[%(asctime)s] (%(filename)s:%(lineno)d %(threadName)s) "
         '%(levelname)s - %(name)s: "%(message)s"'
@@ -27,15 +34,28 @@ logging.basicConfig(
 )
 
 
+@util.semaphore(cfg.sem)
+async def run(data):
+
+    _obj = pars.get_parser_by(data["url"])
+    if _obj:
+        logger.info(f"Начинаю поиск по: \n{data.to_string()}")
+        parser = _obj(headless=True, user_agent=cfg.USER_AGENTS, proxies=cfg.PROXIES)
+        result = await parser.fetch_payload(model.ExcelData(**data.to_dict()))
+        req = cfg.sql_req.new_session()
+        await req.add_by(sql_model.INN(**result.model_dump()))
+
+
 async def main():
 
-    import pandas as pd
-    
-    data = pd.read_csv(cfg.INN_FILE)
-    
-    while True:
-        logging.info(f"\n{data.head(100)}")
-        await asyncio.sleep(10000)
+    df = pd.read_csv(
+        cfg.INN_FILE,
+        dtype={"url": "string", "inn_number": "string", "case_number": "string"},
+    )
+
+    logger.info(f"\nПолучено: \n{df.head(100)}")
+    await asyncio.gather(*[run(data) for _, data in df.iterrows()])
+    logger.info("Поиск закончен!")
 
 
 asyncio.run(main())

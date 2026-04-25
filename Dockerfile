@@ -28,6 +28,9 @@ WORKDIR /usr/src
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
+    
+RUN playwright install chromium && \
+    playwright install-deps chromium
 
 # Запуск проекта
 ARG FILE_INN

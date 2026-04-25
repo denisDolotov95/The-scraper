@@ -25,6 +25,8 @@ services:
       args:
         - FILE_INN=inn.csv
     #volumes:
+    volumes:
+      - "parser:/usr/src/logs:rw"
     env_file:
       - path: .env
     #restart: always
@@ -32,6 +34,8 @@ services:
     networks:
       parser:
         ipv4_address: 172.40.0.3
+    depends_on: 
+      - postgres
 
 volumes:
   parser:

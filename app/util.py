@@ -1,16 +1,24 @@
 # coding: utf-8
+import typing
 import asyncio
 import logging
 
 from functools import wraps
+from playwright.async_api import TimeoutError
 
-from config import MAX_CONCURRENCY, BASE_BACKOFF, MAX_RETRIES
+from config import BASE_BACKOFF, MAX_RETRIES
+
+
+async def async_generator(iter: typing.Iterator):
+    for i in iter:
+        # await asyncio.sleep(1)
+        yield i
 
 
 def retry(
     max_tries: int = MAX_RETRIES,
     delay: int = BASE_BACKOFF,
-    exceptions: tuple = (TimeoutError, RuntimeError),
+    exceptions: tuple = (TimeoutError,),
 ):
     """Декоратор для повторного вызова доменной модели при возникновении ошибок"""
 
@@ -20,41 +28,41 @@ def retry(
             tries = 0
             for attempt in range(1, max_tries + 1):
                 try:
-                    return func(*args, **kwargs)
+                    return await func(*args, **kwargs)
                 except exceptions as e:
                     tries += 1
                     if tries == max_tries:
                         logging.error(
-                            f"{func.__name__} закончился неудачей после {MAX_RETRIES} попыток"
+                            f"{func.__name__}({args}, {kwargs}) закончился неудачей после {max_tries} попыток"
                         )
                         raise e
                     new_delay = delay * (2 ** (attempt - 1))
                     logging.warning(
-                        f"{func.__name__} попытка {attempt}; искючение: {e}; задержка {new_delay}"
+                        f"{func.__name__}({args}, {kwargs}) попытка {attempt}; задержка {new_delay};\n{e}"
                     )
                     await asyncio.sleep(new_delay)
                 except Exception as e:
-                    logging.error(f"{func.__name__} необработанное исключение: {e}")
+                    logging.error(
+                        f"{func.__name__}({args}, {kwargs}), необработанное исключение:\n{e}"
+                    )
 
         return wrapper
 
     return decorator
 
 
-def semaphore(max_tasks: int = MAX_CONCURRENCY):
+def semaphore(sem: asyncio.Semaphore):
     """Декоратор для ограничения количество доступов к какой-либо доменной модели
 
     Args:
         max_concurrent_tasks (_type_): сколько раз можно вызвать
     """
-    # Создаем семафор для ограничения доступа какой-либо доменной модели
-    sem = asyncio.Semaphore(max_tasks)
 
     def decorator(func):
         @wraps(func)  # Сохраняет метаданные оригинальной функции (__name__, __doc__)
         async def wrapper(*args, **kwargs):
             # Захватываем семафор перед выполнением функции
-            with sem:
+            async with sem:
                 return await func(*args, **kwargs)
 
         return wrapper
