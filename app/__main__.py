@@ -24,7 +24,6 @@ rot_file_handler = l_handl.RotatingFileHandler(
     "./app/logs/app.log", maxBytes=50 * 1024 * 1024, backupCount=10, encoding="utf-8"
 )
 
-
 logging.basicConfig(
     handlers=None if "1" == os.getenv("LOG_STDOUT", "0") else [rot_file_handler],
     format=(
@@ -35,15 +34,28 @@ logging.basicConfig(
 
 
 @util.semaphore(cfg.sem)
-async def run(data):
+async def runner(data: pd.Series):
+    """Запуск ранера, который будет инициализировать подключение через бразуер
+    и получать исходные данные, если данные получены и они не пустые,
+    то сохраняем их в БД.
 
+    Args:
+        data (pd.Series): _description_
+    """
     _obj = pars.get_parser_by(data["url"])
     if _obj:
-        logger.info(f"Начинаю поиск по: \n{data.to_string()}")
-        parser = _obj(headless=True, user_agent=cfg.USER_AGENTS, proxies=cfg.PROXIES)
+        logger.info(f"Начинается поиск по: \n{data.to_string()}")
+        parser = _obj(
+            headless=cfg.HEADLESS, user_agent=cfg.USER_AGENTS, proxies=cfg.PROXIES
+        )
+
         result = await parser.fetch_payload(model.ExcelData(**data.to_dict()))
-        req = cfg.sql_req.new_session()
-        await req.add_by(sql_model.INN(**result.model_dump()))
+        logger.info(f"Получены данные {result} по: \n{data.to_string()}")
+
+        if result:
+            logger.info(f"Сохранить данные {result} в базу")
+            req = cfg.sql_req.new_session()
+            await req.add_by(sql_model.INN(**result.model_dump()))
 
 
 async def main():
@@ -54,8 +66,13 @@ async def main():
     )
 
     logger.info(f"\nПолучено: \n{df.head(100)}")
-    await asyncio.gather(*[run(data) for _, data in df.iterrows()])
-    logger.info("Поиск закончен!")
+    tasks = list()
+    # Создаем задачи
+    async for data in util.async_generator(df):
+        tasks.append(runner(data))
+    # Добавляем задачи в цикл событий
+    await asyncio.gather(*tasks)
+    logger.info("Поиск закончен")
 
 
 asyncio.run(main())

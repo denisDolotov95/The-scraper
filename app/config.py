@@ -7,13 +7,13 @@ from database import engine, request
 engine = engine.EnginePSQL(
     url=os.getenv(
         "DB_URL",
-        "postgresql+asyncpg://postgres:postgres@172.40.0.2:5432/parser",
+        "postgresql+asyncpg://postgres:postgres@192.168.0.101:5432/parser",
     )
 )
 sql_req = request._Session(engine)
 
 # Создаем семафор для ограничения доступа какой-либо доменной модели
-MAX_CONCURRENCY = int(os.environ.get("CONCURRENCY", 5))
+MAX_CONCURRENCY = int(os.environ.get("MAX_CONCURRENCY", 20))
 sem = asyncio.Semaphore(MAX_CONCURRENCY)
 
 # Сколько ретраев необходимо для повторного подключения
@@ -21,6 +21,9 @@ MAX_RETRIES = int(os.environ.get("MAX_RETRIES", 5))
 
 # Начальное значение для задержки (используется экспоненциальное)
 BASE_BACKOFF = float(os.environ.get("BASE_BACKOFF", 1))
+
+# Headless mode (безголовый режим) — это работа браузера без графического интерфейса (окна, вкладок, кнопок).
+HEADLESS = True
 
 # Имя файла ИНН
 INN_FILE = os.environ.get("FILE_INN", "inn.csv")
@@ -34,4 +37,6 @@ USER_AGENTS = [
 ]
 
 # Добавим разные прокси, для обхода блокировки
+# PROXIES = ["socks5://184.178.172.18:15280",
+#            "socks5://98.181.137.83:4145"]
 PROXIES = []

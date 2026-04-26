@@ -1,6 +1,6 @@
 # coding: utf-8
 import re
-
+import pydantic
 import random
 
 from playwright.async_api import async_playwright, Page
@@ -48,7 +48,7 @@ class Fedresurs(Site):
         )
         self._results = {}
 
-    @util.retry(max_tries=2)
+    @util.retry(5)
     async def fetch_payload(self, data: model.ExcelData) -> model.FedresursData:
         """_summary_
 
@@ -62,29 +62,36 @@ class Fedresurs(Site):
 
         async with async_playwright() as pw:
 
-            # Конфигурация бразуера
-            browser = await pw.chromium.launch(headless=self.headless)
-            context = await browser.new_context(
-                user_agent=self.user_agent, proxy=self.proxies
-            )
-            # Получаем объект страницы
-            page = await context.new_page()
+            try:
+                # Конфигурация бразуера
+                browser = await pw.chromium.launch(headless=self.headless)
+                context = await browser.new_context(
+                    user_agent=self.user_agent, proxy=self.proxies
+                )
+                # Получаем объект страницы
+                page = await context.new_page()
 
-            await self.__search_man(page, data.url, data.inn_number)
-            await self.__main_page_man(page)
+                await self.__search_man(page, data.url, data.inn_number)
 
-            # Находим нужные данные
-            for target in [
-                ["a", r"^\s.{3,}-\d{3,}/\d{4}\s$", "case_number"],
-                ["a", r"^\s.*\sот\s\d{2}.\d{2}.\d{4}\s$", "last_date"],
-            ]:
-                result = await self.__get_data(page, target[0], target[1])
-                self._results[target[2]] = result if result else ""
-            await browser.close()
-            return model.FedresursData(inn_number=data.inn_number, **self._results)
+                if await self.__main_page_man(page):
+                    # Находим нужные данные
+                    for target in [
+                        ["a", r"^\s.{3,}-\d{3,}/\d{4}\s$", "case_number"],
+                        ["a", r"^\s.*\sот\s\d{2}.\d{2}.\d{4}\s$", "last_date"],
+                    ]:
+                        result = await self.__get_data(page, target[0], target[1])
+                        self._results[target[2]] = result if result else ""
+                    try:
+                        return model.FedresursData(
+                            inn_number=data.inn_number, **self._results
+                        )
+                    except pydantic.ValidationError:
+                        pass
+            finally:
+                await browser.close()
 
-    # @util.retry()
-    async def __search_man(self, page: Page, url: str, inn: str):
+    @util.retry(3)
+    async def __search_man(self, page: Page, url: str, inn: str) -> None:
         """Поиск карточки пользователя
 
         Args:
@@ -95,12 +102,12 @@ class Fedresurs(Site):
         await page.goto(
             f"{url}entities?searchString={inn}",
             wait_until="networkidle",
-            timeout=30000,
+            timeout=60000,
         )
-        await page.wait_for_selector(f"text={inn}", timeout=5000)
+        await page.wait_for_selector(f"text={inn}", timeout=10000)
 
-    # @util.retry()
-    async def __main_page_man(self, page: Page):
+    @util.retry(3)
+    async def __main_page_man(self, page: Page) -> bool | None:
         """Открыть карточку пользователя
 
         Args:
@@ -108,15 +115,18 @@ class Fedresurs(Site):
         """
 
         # Заходим на страницу банкрота
-        locator = page.locator('text="Вся информация"').first
-        await locator.wait_for(timeout=5000)
-        await locator.scroll_into_view_if_needed()
-        await locator.click()
-        await page.locator('text="Сведения о банкротстве"').first.wait_for(
-            state="visible", timeout=5000
+        locator = await page.wait_for_selector(
+            "text=Вся информация", state="visible", timeout=10000
         )
+        if locator:
+            await locator.scroll_into_view_if_needed()
+            await locator.click()
+            await page.wait_for_selector(
+                "text=Сведения о банкротстве", state="visible", timeout=10000
+            )
+            return True
 
-    @util.retry(max_tries=2)
+    @util.retry(3)
     async def __get_data(self, page: Page, tag: str, text: str) -> str:
         """Получаем данные по определенному локатору, через регулярные варажения
         Args:
@@ -130,6 +140,5 @@ class Fedresurs(Site):
 
         # Попытка найти элемент с точным текстом
         locator = page.locator(tag, has_text=re.compile(text)).first
-        await locator.wait_for(timeout=5000)
-        found = await locator.inner_text()
+        found = await locator.inner_text(timeout=10000)
         return found

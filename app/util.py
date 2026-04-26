@@ -1,5 +1,5 @@
 # coding: utf-8
-import typing
+import pandas as pd
 import asyncio
 import logging
 
@@ -9,10 +9,11 @@ from playwright.async_api import TimeoutError
 from config import BASE_BACKOFF, MAX_RETRIES
 
 
-async def async_generator(iter: typing.Iterator):
-    for i in iter:
+async def async_generator(df: pd.DataFrame):
+    for i, raw in df.iterrows():
         # await asyncio.sleep(1)
-        yield i
+        yield raw
+        df.drop(i)
 
 
 def retry(
@@ -35,7 +36,6 @@ def retry(
                         logging.error(
                             f"{func.__name__}({args}, {kwargs}) закончился неудачей после {max_tries} попыток"
                         )
-                        raise e
                     new_delay = delay * (2 ** (attempt - 1))
                     logging.warning(
                         f"{func.__name__}({args}, {kwargs}) попытка {attempt}; задержка {new_delay};\n{e}"

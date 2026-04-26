@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, date
+from datetime import date
 
-from sqlalchemy import Sequence, UniqueConstraint, BigInteger
+from sqlalchemy import Sequence, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
