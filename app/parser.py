@@ -43,9 +43,7 @@ class Fedresurs(Site):
         self.user_agent: list | set | tuple = (
             random.choice(user_agent) if user_agent else "Mozilla/5.0"
         )
-        self.proxies: list | set | tuple = (
-            {"server": random.choice(proxies)} if proxies else None
-        )
+        self.proxies: list | set | tuple = proxies if proxies else []
         self._results = {}
 
     @util.retry(5)
@@ -66,7 +64,8 @@ class Fedresurs(Site):
                 # Конфигурация бразуера
                 browser = await pw.chromium.launch(headless=self.headless)
                 context = await browser.new_context(
-                    user_agent=self.user_agent, proxy=self.proxies
+                    user_agent=self.user_agent,
+                    proxy={"server": random.choice(self.proxies)},
                 )
                 # Получаем объект страницы
                 page = await context.new_page()
