@@ -34,28 +34,24 @@ logging.basicConfig(
 
 
 @util.semaphore(cfg.sem)
-async def runner(data: pd.Series):
+async def runner(data: pd.Series, pars: pars.Fedresurs | pars.KadArbitr):
     """Запуск ранера, который будет инициализировать подключение через бразуер
-    и получать исходные данные, если данные получены и они не пустые,
+    и получать исходные данные, если данные получены и они непустые (получены все данные),
     то сохраняем их в БД.
 
     Args:
-        data (pd.Series): _description_
+        data (pd.Series): строка с данными из *.csv
     """
-    _obj = pars.get_parser_by(data["url"])
-    if _obj:
-        logger.info(f"Начинается поиск по: \n{data.to_string()}")
-        parser = _obj(
-            headless=cfg.HEADLESS, user_agent=cfg.USER_AGENTS, proxies=cfg.PROXIES
-        )
 
-        result = await parser.fetch_payload(model.ExcelData(**data.to_dict()))
-        logger.info(f"Получены данные {result} по: \n{data.to_string()}")
+    logger.info(f"Начинается поиск по: \n{data.to_string()}")
 
-        if result:
-            logger.info(f"Сохранить данные {result} в базу")
-            req = cfg.sql_req.new_session()
-            await req.add_by(sql_model.INN(**result.model_dump()))
+    result = await pars.fetch_payload(model.ExcelData(**data.to_dict()))
+    logger.info(f"Получены данные {result} по: \n{data.to_string()}")
+
+    if result:
+        logger.info(f"Сохранить данные {result} в базу")
+        req = cfg.sql_req.new_session()
+        await req.add_by(pars._orm(**result.model_dump()))
 
 
 async def main():
@@ -68,8 +64,13 @@ async def main():
     logger.info(f"\nПолучено: \n{df.head(100)}")
     tasks = list()
     # Создаем задачи
-    async for data in util.async_generator(df):
-        tasks.append(runner(data))
+    async for raw in util.async_generator(df):
+        type_pars = pars.get_parser_by(raw["url"])
+        if type_pars:
+            p = type_pars(
+                headless=cfg.HEADLESS, user_agent=cfg.USER_AGENTS, proxies=cfg.PROXIES
+            )
+            tasks.append(runner(raw, p))
     # Добавляем задачи в цикл событий
     await asyncio.gather(*tasks)
     logger.info("Поиск закончен")

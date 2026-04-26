@@ -17,12 +17,12 @@ class Fedresurs(Base):
         UniqueConstraint("inn_number", "last_date", name="uq_inn_numb_last_date"),
     )
 
-    inn_id_seq = Sequence("inn_id_seq", start=0, increment=1)
+    fedresurs_id_seq = Sequence("fedresurs_id_seq", start=0, increment=1)
 
     # id: Mapped[int] = mapped_column(
     #     inn_id_seq, server_default=inn_id_seq.next_value(), primary_key=True
     # )
-    id: Mapped[int] = mapped_column(inn_id_seq, primary_key=True)
+    id: Mapped[int] = mapped_column(fedresurs_id_seq, primary_key=True)
     inn_number: Mapped[str] = mapped_column(nullable=False)
     case_number: Mapped[str] = mapped_column(nullable=False)
     last_date: Mapped[date] = mapped_column(nullable=False)

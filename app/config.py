@@ -37,7 +37,8 @@ USER_AGENTS = [
 ]
 
 # Добавим разные прокси, для обхода блокировки
-# PROXIES = ["socks5://184.178.172.18:15280",
-#            "socks5://98.181.137.83:4145"]
-PROXIES = ["socks5://5.255.103.55:1080",
-           "socks5://109.71.241.67:1080"]
+PROXIES = (
+    [str(i) for i in os.environ.get("PROXIES").split(",") if i.strip()]
+    if os.environ.get("PROXIES")
+    else None
+)
