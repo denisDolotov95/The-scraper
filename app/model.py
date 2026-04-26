@@ -10,11 +10,11 @@ class Base(pydantic.BaseModel):
 
 
 class ExcelData(Base):
-    
+
     url: str
     inn_number: Optional[str]
     case_number: Optional[str | float]
-    
+
 
 class FedresursData(Base):
 

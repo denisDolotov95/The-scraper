@@ -8,7 +8,6 @@ from pathlib import Path
 
 from ..database import request, engine, model as sql_model
 
-
 all = ["db_session"]
 
 
