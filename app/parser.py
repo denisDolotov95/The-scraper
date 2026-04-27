@@ -258,6 +258,7 @@ class KadArbitr(Site):
 
         Args:
             page (_type_): Page
+            case_number (_type_): case_number
         """
 
         case = page.locator(".b-container a", has_text=case_number)
