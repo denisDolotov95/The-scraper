@@ -1,6 +1,6 @@
 # The-scraper
 
-Парсеры для поиска людей/организаций по банкротству с сайтов: https://kad.arbitr.ru и https://fedresurs.ru
+Парсеры для поиска людей/организаций по банкротству с сайтов: https://kad.arbitr.ru, https://fedresurs.ru
 
 ## Требования
 
