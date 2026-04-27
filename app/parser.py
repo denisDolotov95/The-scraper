@@ -55,10 +55,10 @@ class Fedresurs(Site):
         """Получить необходимые данные с сайта
 
         Args:
-            data (model.ExcelData): _description_
+            data (model.ExcelData): модель данных строки из таблицы
 
         Returns:
-            model.FedresursData: _description_
+            model.FedresursData: модель искомых данных
         """
 
         async with async_playwright() as pw:
@@ -105,7 +105,7 @@ class Fedresurs(Site):
         """Поиск карточки пользователя
 
         Args:
-            page (_type_): Page
+            page (Page): объект страницы
             url (str): url
             inn (int): inn
         """
@@ -121,7 +121,7 @@ class Fedresurs(Site):
         """Открыть карточку пользователя
 
         Args:
-            page (_type_): Page
+            page (Page): объект страницы
         """
 
         # Заходим на страницу банкрота
@@ -140,9 +140,9 @@ class Fedresurs(Site):
     async def __get_data(self, page: Page, tag: str, text: str) -> str:
         """Получаем данные по определенному локатору, через регулярные варажения
         Args:
-            page (Page): _description_
-            tag (str): _description_
-            text (str): _description_
+            page (Page): объект страницы
+            tag (str): тэг в html
+            text (str): текст в теле блока
 
         Returns:
             _type_: _description_
@@ -177,10 +177,10 @@ class KadArbitr(Site):
         """Получить необходимые данные с сайта
 
         Args:
-            data (model.ExcelData): _description_
+            data (model.ExcelData): модель данных строки из таблицы
 
         Returns:
-            model.KadArbitrData: _description_
+            model.KadArbitrData: модель искомых данных
         """
 
         async with async_playwright() as pw:
@@ -238,7 +238,7 @@ class KadArbitr(Site):
         """Поиск карточки пользователя
 
         Args:
-            page (_type_): Page
+            page (Page): объект страницы
             case_number (str): case_number
         """
         await page.fill('input[placeholder="например, А50-5568/08"]', case_number)
@@ -257,7 +257,7 @@ class KadArbitr(Site):
         """Открыть карточку пользователя
 
         Args:
-            page (_type_): Page
+            page (Page): объект страницы
             case_number (_type_): case_number
         """
 
@@ -270,10 +270,10 @@ class KadArbitr(Site):
     async def __get_data(self, page: Page) -> tuple[str, str] | None:
         """Получаем данные по определенному локатору
         Args:
-            page (Page): _description_
+            page (Page): объект страницы
 
         Returns:
-            _type_: _description_
+            tuple[str, str] | None: _description_
         """
 
         # Попытка найти элемент с точным текстом
