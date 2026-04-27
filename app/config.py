@@ -7,8 +7,11 @@ from database import engine, request
 engine = engine.EnginePSQL(
     url=os.getenv(
         "DB_URL",
-        "postgresql+asyncpg://postgres:postgres@192.168.0.101:5432/parser",
-    )
+        "postgresql+asyncpg://postgres:postgres@172.40.0.2:5432/parser",
+    ),
+    connect_args={
+        'timeout': 10,  # 10 секунд на подключени
+    }
 )
 sql_req = request._Session(engine)
 
@@ -20,7 +23,7 @@ sem = asyncio.Semaphore(MAX_CONCURRENCY)
 MAX_RETRIES = int(os.environ.get("MAX_RETRIES", 5))
 
 # Начальное значение для задержки (используется экспоненциальное)
-BASE_BACKOFF = float(os.environ.get("BASE_BACKOFF", 1))
+BASE_BACKOFF = float(os.environ.get("BASE_BACKOFF", 1.0))
 
 # Headless mode (безголовый режим) — это работа браузера без графического интерфейса (окна, вкладок, кнопок).
 HEADLESS = True
@@ -31,6 +34,7 @@ INN_FILE = os.environ.get("FILE_INN", "inn.csv")
 # Добавим разные агенты, для обхода блокировки
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 YaBrowser/24.x.x.x Safari/537.36",

@@ -10,8 +10,6 @@ import parser as pars
 import config as cfg
 import model
 
-from database import model as sql_model
-
 logger = logging.getLogger(__name__)
 
 for log in (logging.getLogger(n) for n in logging.root.manager.loggerDict):
@@ -42,16 +40,18 @@ async def runner(data: pd.Series, pars: pars.Fedresurs | pars.KadArbitr):
     Args:
         data (pd.Series): строка с данными из *.csv
     """
+    try:
+        logger.info(f"Начинается поиск по: \n{data.to_string()}")
 
-    logger.info(f"Начинается поиск по: \n{data.to_string()}")
+        result = await pars.fetch_payload(model.ExcelData(**data.to_dict()))
+        logger.info(f"Получены данные {result} по: \n{data.to_string()}")
 
-    result = await pars.fetch_payload(model.ExcelData(**data.to_dict()))
-    logger.info(f"Получены данные {result} по: \n{data.to_string()}")
-
-    if result:
-        logger.info(f"Сохранить данные {result} в базу")
-        req = cfg.sql_req.new_session()
-        await req.add_by(pars._orm(**result.model_dump()))
+        if result:
+            logger.info(f"Сохранить данные {result} в базу")
+            req = cfg.sql_req.new_session()
+            await req.add_by(pars._orm(**result.model_dump()))
+    except Exception as e:
+        logger.error(e)
 
 
 async def main():

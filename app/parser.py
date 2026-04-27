@@ -169,6 +169,7 @@ class KadArbitr(Site):
         self.user_agent: list | set | tuple = user_agent
         self.proxies: list | set | tuple = proxies
         self._orm = sql_model.KadArbitr
+        self._viewport = {"width": 1920, "height": 1080}
         self._results = {}
 
     @util.retry(5)
@@ -186,8 +187,11 @@ class KadArbitr(Site):
 
             try:
                 # Конфигурация бразуера
-                browser = await pw.chromium.launch(headless=self.headless)
+                browser = await pw.chromium.launch(
+                    headless=self.headless, args=["--headless=new"]
+                )
                 context = await browser.new_context(
+                    viewport=self._viewport,
                     user_agent=(
                         random.choice(self.user_agent)
                         if self.user_agent
@@ -238,14 +242,15 @@ class KadArbitr(Site):
             case_number (str): case_number
         """
         await page.fill('input[placeholder="например, А50-5568/08"]', case_number)
-        # await page.screenshot(path="full_page.png", full_page=True)
         button = page.locator(".b-button-container button", has_text="Найти")  # Точно
-        # await button.click()
-        await button.scroll_into_view_if_needed()
-        box = await button.bounding_box()
-        if box:
-            # Двигаем мышь в центр кнопки и кликаем
-            await page.mouse.click(box["x"] + box["width"] / 4, box["y"] + box["height"] / 2)
+        await button.click(delay=1000)
+        # await button.scroll_into_view_if_needed()
+        # box = await button.bounding_box()
+        # if box:
+        #     # Двигаем мышь в центр кнопки и кликаем
+        #     await page.mouse.click(
+        #         box["x"] + box["width"] / 4, box["y"] + box["height"] / 2
+        #     )
 
     @util.retry(3)
     async def __main_page_man(self, page: Page, case_number: str) -> None:
