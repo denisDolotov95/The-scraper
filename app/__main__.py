@@ -10,6 +10,8 @@ import parser as pars
 import config as cfg
 import model
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 logger = logging.getLogger(__name__)
 
 for log in (logging.getLogger(n) for n in logging.root.manager.loggerDict):
@@ -55,7 +57,7 @@ async def runner(data: pd.Series, pars: pars.Fedresurs | pars.KadArbitr):
 
 
 async def main():
-
+    """Формируем задачи для параллельного посика данных по конкретным url"""
     df = pd.read_csv(
         cfg.INN_FILE,
         dtype={"url": "string", "inn_number": "string", "case_number": "string"},
@@ -76,4 +78,25 @@ async def main():
     logger.info("Поиск закончен")
 
 
-asyncio.run(main())
+async def scheduler():
+    """Планеровщик выполенения запросов для парсинга сайтов"""
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(
+        main,
+        "interval",
+        minutes=cfg.SCHEDULE_INTERVAL,
+        # seconds=5,
+    )
+    scheduler.print_jobs()
+    scheduler.start()
+
+    while True:
+        await asyncio.sleep(10**10)
+
+
+# Проверка установлен ли флаг в переменном
+# окружении контейнре на зацикленном выполнении
+if cfg.SCHEDULE:
+    asyncio.run(scheduler())
+else:
+    asyncio.run(main())

@@ -22,6 +22,11 @@ sem = asyncio.Semaphore(MAX_CONCURRENCY)
 # Сколько ретраев необходимо для повторного подключения
 MAX_RETRIES = int(os.environ.get("MAX_RETRIES", 5))
 
+# Планировщик запросов (если хотим, чтобы демон/контейнер был зациклнен и
+# не завершался со стасуом 0)
+SCHEDULE = int(os.environ.get("SCHEDULE", 0))
+SCHEDULE_INTERVAL = int(os.environ.get("SCHEDULE_INTERVAL", 1440))
+
 # Начальное значение для задержки (используется экспоненциальное)
 BASE_BACKOFF = float(os.environ.get("BASE_BACKOFF", 1.0))
 
