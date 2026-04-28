@@ -130,7 +130,7 @@ class Fedresurs(Site):
         )
         if locator:
             # await locator.scroll_into_view_if_needed()
-            await locator.click()
+            await locator.click(delay=random.uniform(300, 1000))
             await page.wait_for_selector(
                 "text=Сведения о банкротстве", state="visible", timeout=10000
             )
@@ -187,9 +187,7 @@ class KadArbitr(Site):
 
             try:
                 # Конфигурация бразуера
-                browser = await pw.chromium.launch(
-                    headless=self.headless, args=["--headless=new"]
-                )
+                browser = await pw.chromium.launch(headless=self.headless)
                 context = await browser.new_context(
                     viewport=self._viewport,
                     user_agent=(
@@ -241,9 +239,9 @@ class KadArbitr(Site):
             page (Page): объект страницы
             case_number (str): case_number
         """
-        await page.fill('input[placeholder="например, А50-5568/08"]', case_number)
+        await page.get_by_placeholder("например, А50-5568/08").fill(case_number)
         button = page.locator(".b-button-container button", has_text="Найти")  # Точно
-        await button.click(delay=1000)
+        await button.click(delay=random.uniform(1000, 2000))
         # await button.scroll_into_view_if_needed()
         # box = await button.bounding_box()
         # if box:
@@ -261,8 +259,13 @@ class KadArbitr(Site):
             case_number (_type_): case_number
         """
 
-        case = page.locator(".b-container a", has_text=case_number)
-        await case.click()
+        await page.wait_for_selector(
+            '.b-container a.num_case', state="visible", timeout=10000
+        )
+        case = page.locator(
+            '.b-container a.num_case', has_text=case_number
+        ).first
+        await case.click(delay=random.uniform(300, 1000))
         url = await case.get_attribute("href")
         await page.goto(url, wait_until="domcontentloaded")
 
