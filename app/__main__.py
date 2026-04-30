@@ -14,6 +14,9 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 logger = logging.getLogger(__name__)
 
+if not os.path.exists("./app/logs"):
+    os.mkdir("./app/logs")
+
 for log in (logging.getLogger(n) for n in logging.root.manager.loggerDict):
     if "1" == os.getenv("DEBUG", "0"):
         log.setLevel(logging.DEBUG)
