@@ -32,6 +32,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 RUN playwright install chromium && \
     playwright install-deps chromium
 
+# Copy application code
+COPY . .
+
 # Запуск проекта
 ARG FILE_INN
 ENV FILE_INN=$FILE_INN
