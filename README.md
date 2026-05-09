@@ -24,13 +24,13 @@
 │   └── utils.py        # доп. функционал
 ├── logs                # логи
 ├── tests               # тесты
-├── docker-compose.yml
-├── Dockerfile
-├── entrypoint.sh
-├── inn.csv
+├── docker-compose.yml  # конфигурация для контейнера
+├── Dockerfile          # конфигурация контейнера
+├── entrypoint.sh       # скрипт для миграций перед стартом контейнера
+├── inn.csv             # файл с данными
 ├── README.md
 ├── requirements.in
-└── requirements.txt
+└── requirements.txt    # зависимости проекта
 ```
 
 ## Установка и запуск (локально)
