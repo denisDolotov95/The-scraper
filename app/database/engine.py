@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from abc import ABC
+
 from sqlalchemy import create_engine, pool
 from sqlalchemy.ext.asyncio import create_async_engine
 

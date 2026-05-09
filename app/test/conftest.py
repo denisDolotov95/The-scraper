@@ -1,12 +1,15 @@
 # coding: utf-8
 import os
+from pathlib import Path
+
 import pytest
 
-from pathlib import Path
+from ..database import engine
+from ..database import model as sql_model
+from ..database import request
 
 # from sqlalchemy.orm import sessionmaker
 
-from ..database import request, engine, model as sql_model
 
 all = ["db_session"]
 

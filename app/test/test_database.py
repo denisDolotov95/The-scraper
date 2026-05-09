@@ -1,9 +1,10 @@
 # coding: utf-8
-import pytest
-
 from datetime import datetime
 
-from ..database import request, model as sql_model
+import pytest
+
+from ..database import model as sql_model
+from ..database import request
 
 
 class TestDB:

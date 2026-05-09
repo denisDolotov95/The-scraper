@@ -1,15 +1,14 @@
 # coding: utf-8
-import os
-import pandas as pd
 import asyncio
 import logging
 import logging.handlers as l_handl
-
-import util
+import os
 import parser as pars
+
 import config as cfg
 import model
-
+import pandas as pd
+import util
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 logger = logging.getLogger(__name__)

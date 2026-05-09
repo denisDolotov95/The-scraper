@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from abc import ABC, abstractmethod
-from sqlalchemy import Sequence, select, update, delete
+
+from sqlalchemy import Sequence, delete, select, update
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session, sessionmaker
 
 from .engine import Engine, EnginePSQL, EngineSQLite
 

@@ -1,8 +1,8 @@
 # coding: utf-8
-import pydantic
-
+from datetime import date, datetime
 from typing import Optional
-from datetime import datetime, date
+
+import pydantic
 
 
 class Base(pydantic.BaseModel):

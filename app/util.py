@@ -1,12 +1,11 @@
 # coding: utf-8
-import pandas as pd
 import asyncio
 import logging
-
 from functools import wraps
-from playwright.async_api import TimeoutError
 
+import pandas as pd
 from config import BASE_BACKOFF, MAX_RETRIES
+from playwright.async_api import TimeoutError
 
 
 async def async_generator(df: pd.DataFrame):

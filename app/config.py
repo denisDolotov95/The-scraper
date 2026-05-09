@@ -1,6 +1,6 @@
 # coding: utf-8
-import os
 import asyncio
+import os
 
 from database import engine, request
 

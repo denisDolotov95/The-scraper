@@ -1,16 +1,14 @@
 # coding: utf-8
-import re
-import pydantic
 import random
-
-from playwright.async_api import async_playwright, Page, TimeoutError
-from playwright_stealth import Stealth
+import re
 from abc import ABC, abstractmethod
 
-import util
 import model
-
+import pydantic
+import util
 from database import model as sql_model
+from playwright.async_api import Page, TimeoutError, async_playwright
+from playwright_stealth import Stealth
 
 
 def get_parser_by(url: str):
