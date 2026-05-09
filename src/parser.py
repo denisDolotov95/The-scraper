@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 import model
 import pydantic
-import util
+import utils
 from database import model as sql_model
 from playwright.async_api import Page, TimeoutError, async_playwright
 from playwright_stealth import Stealth
@@ -48,7 +48,7 @@ class Fedresurs(Site):
         self._orm = sql_model.Fedresurs
         self._results = {}
 
-    @util.retry(5)
+    @utils.retry(5)
     async def fetch_payload(self, data: model.ExcelData) -> model.FedresursData:
         """Получить необходимые данные с сайта
 
@@ -98,7 +98,7 @@ class Fedresurs(Site):
             finally:
                 await browser.close()
 
-    @util.retry(3)
+    @utils.retry(3)
     async def __search_man(self, page: Page, url: str, inn: str) -> None:
         """Поиск карточки пользователя
 
@@ -114,7 +114,7 @@ class Fedresurs(Site):
         )
         await page.wait_for_selector(f"text={inn}", timeout=10000)
 
-    @util.retry(3)
+    @utils.retry(3)
     async def __main_page_man(self, page: Page) -> bool | None:
         """Открыть карточку пользователя
 
@@ -134,7 +134,7 @@ class Fedresurs(Site):
             )
             return True
 
-    @util.retry(3)
+    @utils.retry(3)
     async def __get_data(self, page: Page, tag: str, text: str) -> str:
         """Получаем данные по определенному локатору, через регулярные варажения
         Args:
@@ -170,7 +170,7 @@ class KadArbitr(Site):
         self._viewport = {"width": 1920, "height": 1080}
         self._results = {}
 
-    @util.retry(5)
+    @utils.retry(5)
     async def fetch_payload(self, data: model.ExcelData) -> model.KadArbitrData:
         """Получить необходимые данные с сайта
 
@@ -229,7 +229,7 @@ class KadArbitr(Site):
             finally:
                 await browser.close()
 
-    @util.retry(3)
+    @utils.retry(3)
     async def __search_man(self, page: Page, case_number: str) -> None:
         """Поиск карточки пользователя
 
@@ -248,7 +248,7 @@ class KadArbitr(Site):
         #         box["x"] + box["width"] / 4, box["y"] + box["height"] / 2
         #     )
 
-    @util.retry(3)
+    @utils.retry(3)
     async def __main_page_man(self, page: Page, case_number: str) -> None:
         """Открыть карточку пользователя
 
@@ -267,7 +267,7 @@ class KadArbitr(Site):
         url = await case.get_attribute("href")
         await page.goto(url, wait_until="domcontentloaded")
 
-    @util.retry(3)
+    @utils.retry(3)
     async def __get_data(self, page: Page) -> tuple[str, str] | None:
         """Получаем данные по определенному локатору
         Args:

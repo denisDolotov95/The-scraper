@@ -8,13 +8,13 @@ import parser as pars
 import config as cfg
 import model
 import pandas as pd
-import util
+import utils
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 logger = logging.getLogger(__name__)
 
-if not os.path.exists("./app/logs"):
-    os.mkdir("./app/logs")
+if not os.path.exists("./logs"):
+    os.mkdir("./logs")
 
 for log in (logging.getLogger(n) for n in logging.root.manager.loggerDict):
     if "1" == os.getenv("DEBUG", "0"):
@@ -23,7 +23,7 @@ for log in (logging.getLogger(n) for n in logging.root.manager.loggerDict):
         log.setLevel(logging.INFO)
 
 rot_file_handler = l_handl.RotatingFileHandler(
-    "./app/logs/app.log", maxBytes=50 * 1024 * 1024, backupCount=10, encoding="utf-8"
+    "./logs/app.log", maxBytes=50 * 1024 * 1024, backupCount=10, encoding="utf-8"
 )
 
 logging.basicConfig(
@@ -35,7 +35,7 @@ logging.basicConfig(
 )
 
 
-@util.semaphore(cfg.sem)
+@utils.semaphore(cfg.sem)
 async def runner(data: pd.Series, pars: pars.Fedresurs | pars.KadArbitr):
     """Запуск ранера, который будет инициализировать подключение через бразуер
     и получать исходные данные, если данные получены и они непустые (получены все данные),
@@ -68,7 +68,7 @@ async def main():
     logger.info(f"\nПолучено: \n{df.head(100)}")
     tasks = list()
     # Создаем задачи
-    async for raw in util.async_generator(df):
+    async for raw in utils.async_generator(df):
         type_pars = pars.get_parser_by(raw["url"])
         if type_pars:
             p = type_pars(

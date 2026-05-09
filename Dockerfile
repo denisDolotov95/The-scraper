@@ -44,4 +44,4 @@ COPY . .
 RUN chmod 755 entrypoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
-CMD ["python3", "app"]
+CMD ["python3", "src"]
